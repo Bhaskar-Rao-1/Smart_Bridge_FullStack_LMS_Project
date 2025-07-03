@@ -1,0 +1,27 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Login from './components/common/Login';
+import Register from './components/common/Register';
+import Home from './components/common/Home';
+import Dashboard from './components/common/Dashboard';
+import StudentHome from './components/user/student/StudentHome';
+import TeacherHome from './components/user/teacher/TeacherHome';
+import AdminHome from './components/admin/AdminHome';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/student" element={<StudentHome />} />
+        <Route path="/teacher" element={<TeacherHome />} />
+        <Route path="/admin" element={<AdminHome />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
