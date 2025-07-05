@@ -1,0 +1,124 @@
+🧠 Project Title: LearnHub – A Full Stack LMS Platform
+🔧 Tech Stack
+Layer	Technology
+Frontend	React, Vite, Axios
+Backend	Node.js, Express.js
+Database	MongoDB, Mongoose
+Styling	Inline CSS, external assets
+Authentication	Basic (no JWT yet), with bcrypt for password hashing
+
+🌟 Key Features
+👤 User Roles
+Admin
+
+Can upload new courses with images and pricing.
+
+Admin account is predefined (e.g., bhaskar@gmail.com).
+
+Teacher
+
+View their teaching dashboard (further management can be added).
+
+Student
+
+Can register/login, view available courses, and enroll in them.
+
+If not enrolled in any course, they’re prompted to explore.
+
+🔐 Authentication
+Login and Registration for all users.
+
+Passwords are hashed using bcrypt.
+
+Role-based routing:
+
+admin → /admin
+
+teacher → /teacher
+
+student → /student
+
+📁 Folder Structure
+pgsql
+Copy
+Edit
+Project/
+├── backend/
+│   ├── controllers/
+│   │   ├── userControllers.js
+│   │   ├── courseController.js
+│   ├── routes/
+│   │   ├── userRoutes.js
+│   │   ├── courseRoutes.js
+│   ├── schemas/
+│   │   ├── userModel.js
+│   │   ├── courseModel.js
+│   ├── .env
+│   └── index.js
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── admin/AdminHome.jsx
+│   │   │   ├── user/student/StudentHome.jsx
+│   │   │   ├── user/teacher/TeacherHome.jsx
+│   │   │   ├── common/
+│   │   │   │   ├── Login.jsx
+│   │   │   │   ├── Register.jsx
+│   │   │   │   ├── Home.jsx
+│   │   │   │   ├── Dashboard.jsx
+│   │   │   │   ├── ExploreCourses.jsx
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── App.css
+│
+├── .gitignore
+└── README.md
+🔄 Functional Flow
+User visits / → sees welcome page (Home.jsx)
+
+Can register as a student/teacher/admin
+
+After login:
+
+Students go to StudentHome
+
+Admins go to AdminHome where they can add courses
+
+Teachers go to their teaching panel
+
+Courses are fetched from MongoDB
+
+Students can enroll and view enrolled courses
+
+🖼️ UI Highlights
+Modern background images for Home and Student pages
+
+Minimalist cards and buttons
+
+Responsive layout (basic)
+
+🧪 Testing the Project
+Run backend:
+
+bash
+Copy
+Edit
+cd backend
+npm install
+npm start
+Run frontend:
+
+bash
+Copy
+Edit
+cd frontend
+npm install
+npm run dev
+Go to http://localhost:5173
+
+🔒 Admin Hardcoded User
+To restrict admin access:
+
+In userControllers.js, check if the registering email is "bhaskar@gmail.com" and force role to admin.
+
