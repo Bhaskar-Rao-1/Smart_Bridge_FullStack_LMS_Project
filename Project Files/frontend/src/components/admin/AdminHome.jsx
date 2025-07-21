@@ -1,99 +1,119 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react'
+import { Button, styled, TableRow, TableHead, TableContainer, Paper, Table, TableBody, TableCell, tableCellClasses } from '@mui/material'
+import axiosInstance from '../common/AxiosInstance'
+
+
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+   [`&.${tableCellClasses.head}`]: {
+      backgroundColor: theme.palette.common.black,
+      color: theme.palette.common.white,
+   },
+   [`&.${tableCellClasses.body}`]: {
+      fontSize: 14,
+   },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+   '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.action.hover,
+   },
+   // hide last border
+   '&:last-child td, &:last-child th': {
+      border: 0,
+   },
+}));
+
 
 const AdminHome = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
+   const [allUsers, setAllUsers] = useState([])
 
-  const handleUpload = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post('/api/courses', {
-        title,
-        description,
-        price,
-      });
+   const allUsersList = async () => {
+      try {
+         const res = await axiosInstance.get('api/admin/getallusers', {
+            headers: {
+               "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+         })
+         if (res.data.success) {
+            setAllUsers(res.data.data)
+         }
+         else {
+            alert(res.data.message)
+         }
+      } catch (error) {
+         console.log(error);
+      }
+   }
 
-      alert('Course uploaded successfully');
-      setTitle('');
-      setDescription('');
-      setPrice('');
-    } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Course upload failed');
-    }
-  };
+   useEffect(() => {
+      allUsersList()
+   }, [])
 
-  return (
-    <div style={styles.container}>
-      <h2>Admin Dashboard</h2>
-      <p>Manage users, courses, and platform settings here.</p>
+   const deleteUser = async (userId) => {
+      const confirmation = confirm('Are you sure you want to delete')
+      if (!confirmation) {
+         return;
+      }
+      try {
+         const res = await axiosInstance.delete(`api/user/deleteuser/${userId}`, {
+            headers: {
+               Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+         })
+         if (res.data.success) {
+            alert(res.data.message)
+            allUsersList()
+         } else {
+            alert("Failed to delete the user")
+         }
+      } catch (error) {
+         console.log('An error occurred:', error);
+      }
+   }
 
-      <form onSubmit={handleUpload} style={styles.form}>
-        <input
-          type="text"
-          placeholder="Course Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          style={styles.input}
-        />
-        <textarea
-          placeholder="Course Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          style={styles.textarea}
-        />
-        <input
-          type="number"
-          placeholder="Price (0 for free)"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          required
-          style={styles.input}
-        />
-        <button type="submit" style={styles.button}>Upload Course</button>
-      </form>
-    </div>
-  );
-};
+   return (
+      <TableContainer component={Paper}>
+         <Table sx={{ minWidth: 700 }} aria-label="customized table">
+            <TableHead>
+               <TableRow>
+                  <StyledTableCell>User ID</StyledTableCell>
+                  <StyledTableCell align="left">User Name</StyledTableCell>
+                  <StyledTableCell align="left">Email</StyledTableCell>
+                  <StyledTableCell align="left">Type</StyledTableCell>
+                  <StyledTableCell align="left">Action</StyledTableCell>
+               </TableRow>
+            </TableHead>
+            <TableBody>
+               {
+                  allUsers.length > 0 ? (
+                     allUsers.map((user) => (
+                        <StyledTableRow key={user._id}>
+                           <StyledTableCell component="th" scope="row">
+                              {user._id}
+                           </StyledTableCell>
+                           <StyledTableCell component="th" scope="row">
+                              {user.name}
+                           </StyledTableCell>
+                           <StyledTableCell component="th" scope="row">
+                              {user.email}
+                           </StyledTableCell>
+                           <StyledTableCell component="th" scope="row">
+                              {user.type}
+                           </StyledTableCell>
+                           <StyledTableCell component="th" scope="row">
+                              <Button onClick={()=> deleteUser(user._id)} size='small' color="error">Delete</Button>
+                              {/* <Button size='small' color="info">Update</Button> */}
+                           </StyledTableCell>
+                        </StyledTableRow>
+                     )))
+                     :
+                     (<p className='px-2'>No users found</p>)
+               }
+            </TableBody>
+         </Table>
+      </TableContainer>
+   )
+}
 
-const styles = {
-  container: {
-    padding: '2rem',
-    maxWidth: '600px',
-    margin: 'auto',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-    marginTop: '2rem',
-  },
-  input: {
-    padding: '10px',
-    fontSize: '16px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  },
-  textarea: {
-    padding: '10px',
-    fontSize: '16px',
-    height: '100px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  },
-  button: {
-    backgroundColor: '#007bff',
-    color: 'white',
-    padding: '12px',
-    fontSize: '16px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-};
-
-export default AdminHome;
+export default AdminHome
