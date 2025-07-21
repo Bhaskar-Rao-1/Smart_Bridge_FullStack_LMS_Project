@@ -1,45 +1,40 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const paymentSchema = new mongoose.Schema({
-  // Reference to the user who made the payment
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const coursePaymentModel = mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+    },
+    courseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "course",
+    },
+    cardDetails: {
+      cardholdername: {
+        type: String,
+      },
+      cardnumber: {
+        type: Number,
+      },
+      cvvcode: {
+        type: Number,
+      },
+      expmonthyear: {
+        type: String,
+      },
+    },
+    status: {
+      type: String,
+      default: "enrolled",
+    },
   },
+  {
+    timestamps: true,
+    strict: false,
+  }
+);
 
-  // Reference to the course purchased
-  course: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
-    required: true,
-  },
+const coursePaymentSchema = mongoose.model("coursePayment", coursePaymentModel);
 
-  // Payment amount
-  amount: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-
-  // Payment date
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-
-  // Optional: Payment status (success, failed, pending)
-  status: {
-    type: String,
-    enum: ['success', 'pending', 'failed'],
-    default: 'success',
-  },
-
-  // Optional: Transaction ID or reference number
-  transactionId: {
-    type: String,
-    default: '',
-  },
-});
-
-module.exports = mongoose.model('Payment', paymentSchema);
+module.exports = coursePaymentSchema;
