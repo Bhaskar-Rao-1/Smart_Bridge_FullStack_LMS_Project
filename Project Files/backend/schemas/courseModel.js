@@ -1,57 +1,41 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const courseSchema = new mongoose.Schema({
-  // Title of the course
-  title: {
-    type: String,
-    required: true,
-    trim: true,
+const courseModel = mongoose.Schema(
+  {
+    userId: {
+      type: String,
+      required: true,
+    },
+    C_educator: {
+      type: String,
+      required: [true, "name is required"],
+    },
+    C_title: {
+      type: String,
+      required: [true, "C_title is required"],
+    },
+    C_categories: {
+      type: String,
+      required: [true, "C_categories: is required"],
+    },
+    C_price: {
+      type: String,
+    },
+    C_description: {
+      type: String,
+      required: [true, "C_description: is required"],
+    },
+    sections: {},
+    enrolled: {
+      type: Number,
+      default: 0,
+    },
   },
+  {
+    timestamps: true,
+  }
+);
 
-  // Short description
-  description: {
-    type: String,
-    required: true,
-    trim: true,
-  },
+const courseSchema = mongoose.model("course", courseModel);
 
-  // Instructor name (admin by default)
-  instructor: {
-    type: String,
-    default: 'Admin',
-  },
-
-  // Content (can be list of topics, modules, or video links)
-  content: {
-    type: [String],
-    default: [],
-  },
-
-  // Enrolled students (referencing User model)
-  studentsEnrolled: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'User',
-    default: [],
-  },
-
-  // Optional image for course card
-  image: {
-    type: String,
-    default: 'https://via.placeholder.com/150',
-  },
-
-  // Category field for filtering
-  category: {
-    type: String,
-    enum: ['Web', 'AI', 'Data Science', 'Java', 'Other'],
-    default: 'Other',
-  },
-
-  // Course creation date
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-module.exports = mongoose.model('Course', courseSchema);
+module.exports = courseSchema;
