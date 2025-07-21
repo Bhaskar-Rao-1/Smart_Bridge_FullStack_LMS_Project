@@ -1,37 +1,37 @@
-// backend/index.js
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const cors = require('cors');
+const express = require('express')
+const cors = require('cors')
+const dotenv = require('dotenv')
+const DBConnection = require('./config/connect')
+const path = require("path");
+const fs = require('fs')
 
-const userRoutes = require('./routes/userRoutes');
-const courseRoutes = require('./routes/courseRoutes');
-const adminRoutes = require('./routes/adminRoutes');
+const app = express()
+dotenv.config()
 
-dotenv.config();
+//////connection of DB/////////
+DBConnection()
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const PORT = process.env.PORT 
 
-// MongoDB connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch((err) => console.error('MongoDB connection error:', err));
 
-// Root test route
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
+//////middleware/////////
+app.use(express.json())
+app.use(cors())
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/courses', courseRoutes);
-app.use('/api/admin', adminRoutes);
+const uploadsDir = path.join(__dirname, "uploads");
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Create uploads folder if it doesn’t exist
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+
+///ROUTES///
+app.use('/api/admin', require('./routers/adminRoutes'))
+app.use('/api/user', require('./routers/userRoutes'))
+
+
+
+app.listen(PORT, () => console.log(`running on ${PORT}`))
