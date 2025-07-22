@@ -1,86 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useContext, useState } from "react";
+import NavBar from "./NavBar";
+import UserHome from "./UserHome";
+import { Container } from "react-bootstrap";
+import AddCourse from "../user/teacher/AddCourse";
+import StudentHome from "../user/student/StudentHome";
+import AdminHome from "../admin/AdminHome";
+import { UserContext } from "../../App";
+import EnrolledCourses from "../user/student/EnrolledCourses";
+import CourseContent from "../user/student/CourseContent";
+import AllCourses from "../admin/AllCourses";
+import "../css/Dashboard.css"; // Updated styles for responsiveness
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const [courses, setCourses] = useState([]);
+  const user = useContext(UserContext);
+  const [selectedComponent, setSelectedComponent] = useState("home");
 
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    setUser(storedUser);
-
-    axios.get('/api/courses')
-      .then((res) => setCourses(res.data))
-      .catch((err) => console.error('Failed to load courses:', err));
-  }, []);
-
-  if (!user) return <p style={styles.loading}>Loading user...</p>;
+  const renderSelectedComponent = () => {
+    switch (selectedComponent) {
+      case "home":
+        return <UserHome />;
+      case "addcourse":
+        return <AddCourse />;
+      case "enrolledcourese":
+        return <EnrolledCourses />;
+      case "cousreSection":
+        return <CourseContent />;
+      case "cousres":
+        return <AllCourses />;
+      default:
+        return <UserHome />;
+    }
+  };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.header}>
-        {user.role === 'teacher' ? 'Teacher Dashboard' : 'Student Dashboard'}
-      </h2>
-
-      {user.role === 'student' && (
-        <>
-          <h3>Available Courses</h3>
-          {courses.length === 0 ? (
-            <p>No courses available</p>
-          ) : (
-            courses.map((course) => (
-              <div key={course._id} style={styles.card}>
-                <h4>{course.title}</h4>
-                <p>{course.description}</p>
-                <p><strong>{course.price === 0 ? 'Free' : `₹${course.price}`}</strong></p>
-                <button style={styles.button}>Join Course</button>
-              </div>
-            ))
-          )}
-        </>
-      )}
-
-      {user.role === 'teacher' && (
-        <>
-          <h3>Your Teaching Panel</h3>
-          <p>You can manage and add your courses here.</p>
-          {/* Link to upload or manage courses if available */}
-        </>
-      )}
+    <div className="dashboard-wrapper">
+      <NavBar setSelectedComponent={setSelectedComponent} dark />
+      <Container className="py-4 px-3" style={{ color: "" }}>
+        {renderSelectedComponent()}
+      </Container>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    padding: '2rem',
-    maxWidth: '800px',
-    margin: 'auto',
-  },
-  header: {
-    color: '#007bff',
-    marginBottom: '1rem',
-  },
-  card: {
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    padding: '1rem',
-    marginBottom: '1rem',
-    backgroundColor: '#f9f9f9',
-  },
-  button: {
-    backgroundColor: '#007bff',
-    color: '#fff',
-    padding: '8px 16px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  loading: {
-    textAlign: 'center',
-    marginTop: '3rem',
-    fontSize: '18px',
-  },
 };
 
 export default Dashboard;
