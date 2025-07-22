@@ -1,165 +1,146 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import Dropdown from "react-bootstrap/Dropdown";
+import axiosInstance from "./AxiosInstance";
+
+import "../css/Register.css"; // custom styles here
 
 const Register = () => {
-  const [role, setRole] = useState('student');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const [selectedOption, setSelectedOption] = useState("Select User");
+  const [data, setData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    type: "",
+  });
 
-  const handleRegister = async (e) => {
+  const handleSelect = (eventKey) => {
+    setSelectedOption(eventKey);
+    setData({ ...data, type: eventKey });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setData({ ...data, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const res = await axios.post('http://localhost:5000/api/users/register', {
-        name,
-        email,
-        password,
-        role,
-      });
-
-      if (res.status === 201) {
-        alert('Registration successful!');
-        navigate('/login');
-      }
-    } catch (error) {
-      console.error('Registration failed:', error);
-      alert(error.response?.data?.message || 'Registration failed.');
+    if (!data.name || !data.email || !data.password || !data.type) {
+      return alert("Please fill all fields");
+    } else {
+      axiosInstance
+        .post("/api/user/register", data)
+        .then((response) => {
+          if (response.data.success) {
+            alert(response.data.message);
+            navigate("/login");
+          } else {
+            console.log(response.data.message);
+          }
+        })
+        .catch((error) => {
+          console.log("Error", error);
+        });
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.overlay}>
-        <div style={styles.card}>
-          <h2>Register as {role.charAt(0).toUpperCase() + role.slice(1)}</h2>
-
-          <div style={styles.roleToggle}>
-            {['student', 'teacher', 'admin'].map((r) => (
-              <button
-                key={r}
-                onClick={() => setRole(r)}
-                style={role === r ? styles.activeRole : styles.roleBtn}
-              >
-                {r.charAt(0).toUpperCase() + r.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <form onSubmit={handleRegister} style={styles.form}>
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={styles.input}
-              required
+    <div className="register-bg d-flex align-items-center justify-content-center">
+      <Container component="main" maxWidth="xs">
+        <Box
+          className="register-box"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            boxShadow: 3,
+            padding: 4,
+            borderRadius: 2,
+            backgroundColor: "white",
+          }}>
+          <Avatar sx={{ bgcolor: "#00d1ff", mb: 1 }} />
+          <Typography component="h1" variant="h5">
+            Register
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+            <TextField
+              margin="normal"
+              fullWidth
+              id="name"
+              label="Full Name"
+              name="name"
+              value={data.name}
+              onChange={handleChange}
+              autoComplete="name"
+              autoFocus
             />
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-              required
+            <TextField
+              margin="normal"
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              value={data.email}
+              onChange={handleChange}
+              autoComplete="email"
             />
-            <input
+            <TextField
+              margin="normal"
+              fullWidth
+              name="password"
+              value={data.password}
+              onChange={handleChange}
+              label="Password"
               type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={styles.input}
-              required
+              id="password"
+              autoComplete="current-password"
             />
-            <button type="submit" style={styles.button}>Register</button>
-          </form>
-
-          <p style={{ marginTop: '1rem' }}>
-            Already have an account?{' '}
-            <Link to="/login" style={styles.link}>Login</Link>
-          </p>
-        </div>
-      </div>
+            <div className="form-group my-3">
+              <Dropdown className="w-100">
+                <Dropdown.Toggle variant="outline-light" className="w-100">
+                  {selectedOption}
+                </Dropdown.Toggle>
+                <Dropdown.Menu className="w-100">
+                  <Dropdown.Item onClick={() => handleSelect("Student")}>
+                    Student
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleSelect("Teacher")}>
+                    Teacher
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 2, mb: 2 }}>
+              Sign Up
+            </Button>
+            <Grid container justifyContent="center">
+              <Grid item>
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  style={{ color: "blue", textDecoration: "underline" }}>
+                  Sign In
+                </Link>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
+      </Container>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    backgroundImage:
-      "url('https://study.com/images/reDesign/home/social-image-1200x628.png')",
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    height: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  overlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  card: {
-    backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '10px',
-    boxShadow: '0 0 15px rgba(0, 0, 0, 0.3)',
-    width: '100%',
-    maxWidth: '400px',
-    textAlign: 'center',
-  },
-  roleToggle: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '10px',
-    marginBottom: '1rem',
-  },
-  roleBtn: {
-    backgroundColor: '#e0e0e0',
-    border: 'none',
-    padding: '8px 16px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  activeRole: {
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    padding: '8px 16px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  input: {
-    marginBottom: '1rem',
-    padding: '10px',
-    fontSize: '16px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  },
-  button: {
-    backgroundColor: '#28a745',
-    color: 'white',
-    padding: '10px',
-    fontSize: '16px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  link: {
-    color: '#007bff',
-    textDecoration: 'none',
-    fontWeight: 'bold',
-  },
 };
 
 export default Register;
