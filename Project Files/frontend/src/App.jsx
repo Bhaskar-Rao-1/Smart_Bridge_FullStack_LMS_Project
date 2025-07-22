@@ -1,31 +1,69 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import CourseExplore from './components/user/student/CourseExplore';
-import Login from './components/common/Login';
-import Register from './components/common/Register';
-import Home from './components/common/Home';
-import Dashboard from './components/common/Dashboard';
-import StudentHome from './components/user/student/StudentHome';
-import TeacherHome from './components/user/teacher/TeacherHome';
-import AdminHome from './components/admin/AdminHome';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState, useEffect, createContext } from "react";
+
+import "./App.css";
+import Home from "./components/common/Home";
+import Login from "./components/common/Login";
+import Register from "./components/common/Register";
+import Dashboard from "./components/common/Dashboard";
+import CourseContent from "./components/user/student/CourseContent";
+import EnrolledCourses from "./components/user/student/EnrolledCourses";
+export const UserContext = createContext();
 
 function App() {
+  const date = new Date().getFullYear();
+  const [userData, setUserData] = useState();
+  const [userLoggedIn, setUserLoggedIn] = useState(false);
+
+  const getData = async () => {
+    try {
+      const user = await JSON.parse(localStorage.getItem("user"));
+      if (user && user !== undefined) {
+        setUserData(user);
+        setUserLoggedIn(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/student" element={<StudentHome />} />
-        <Route path="/teacher" element={<TeacherHome />} />
-        <Route path="/admin" element={<AdminHome />} />
-        <Route path="/courses" element={<CourseExplore />} />
-        
-        {/* Fallback route for unknown paths */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <UserContext.Provider value={{ userData, userLoggedIn }}>
+      <div className="App">
+        <Router>
+          <div className="content">
+            <Routes>
+              <Route exact path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              {/* <Route path="/about" element={<About />} />
+            <Route path="/forgotpassword" element={<ForgotPassword />} /> */}
+              {userLoggedIn ? (
+                <>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route
+                    path="/courseSection/:courseId/:courseTitle"
+                    element={<CourseContent />}
+                  />
+                </>
+              ) : (
+                <Route path="/login" element={<Login />} />
+              )}
+            </Routes>
+          </div>
+          {/* Footer */}
+          <footer className="bg-dark text-white text-center py-3 mt-auto">
+            <small>
+              © {new Date().getFullYear()} LearnHub. All rights reserved.
+            </small>
+          </footer>
+        </Router>
+      </div>
+    </UserContext.Provider>
   );
 }
 
